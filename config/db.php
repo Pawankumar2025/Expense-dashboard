@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';       
-$db   = 'test';              
+$db   = 'expenses_db';              
 $user = 'root';        
 $pass = '';             
 $charset = 'utf8mb4';      
