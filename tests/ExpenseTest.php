@@ -14,7 +14,6 @@ class ExpenseTest extends TestCase {
     }
 
     public function testGetCategoryData() {
-        // Sample data
         $this->pdo->exec("INSERT INTO expenses (user_id, description, amount, category, expense_date)
                          VALUES ($this->user_id, 'Lunch', 15.00, 'Food', '2023-01-01')");
         $this->pdo->exec("INSERT INTO expenses (user_id, description, amount, category, expense_date)
@@ -26,7 +25,6 @@ class ExpenseTest extends TestCase {
         $stmt->execute([$this->user_id]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Export CSV
         $this->exportToCSV($results, __DIR__ . '/test_export.csv');
 
         $this->assertCount(2, $results);

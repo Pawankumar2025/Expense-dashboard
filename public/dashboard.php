@@ -9,7 +9,6 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Verify user exists
 $userCheck = $pdo->prepare("SELECT id FROM users WHERE id = ?");
 $userCheck->execute([$user_id]);
 
@@ -19,7 +18,6 @@ if ($userCheck->rowCount() === 0) {
     exit;
 }
 
-// Handle CSV Export
 if (isset($_GET['export'])) {
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="expenses_'.date('Y-m-d').'.csv"');
@@ -38,10 +36,8 @@ if (isset($_GET['export'])) {
     exit;
 }
 
-// Handle CRUD operations
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        // Add new expense
         if (isset($_POST['add_expense'])) {
             $description = trim($_POST['description']);
             $amount = floatval($_POST['amount']);
@@ -55,7 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['message'] = "Expense added successfully!";
         }
         
-        // Update existing expense
         if (isset($_POST['update_expense'])) {
             $expense_id = $_POST['expense_id'];
             $description = trim($_POST['description']);
@@ -76,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Handle delete action
 if (isset($_GET['delete'])) {
     $expense_id = $_GET['delete'];
     
@@ -92,7 +86,6 @@ if (isset($_GET['delete'])) {
     exit;
 }
 
-// Check if editing an expense
 $editing = false;
 $edit_expense = null;
 if (isset($_GET['edit'])) {
@@ -107,9 +100,7 @@ if (isset($_GET['edit'])) {
     }
 }
 
-// Get data for charts
 try {
-    // Expenses by Category
     $categoryStmt = $pdo->prepare("
         SELECT category, SUM(amount) as total 
         FROM expenses 
@@ -139,7 +130,7 @@ try {
         $chartColors[] = $categoryColors[$category['category']] ?? '#CCCCCC';
     }
 
-    // Monthly Expenses (last 12 months)
+    
     $monthlyStmt = $pdo->prepare("
         SELECT 
             DATE_FORMAT(expense_date, '%Y-%m') as month, 
@@ -180,7 +171,6 @@ try {
     $chartMonths = $chartMonthlyTotals = [];
 }
 
-// Fetch all expenses
 $stmt = $pdo->prepare("SELECT * FROM expenses WHERE user_id = ? ORDER BY expense_date DESC");
 $stmt->execute([$user_id]);
 $expenses = $stmt->fetchAll();
@@ -229,7 +219,6 @@ $expenses = $stmt->fetchAll();
         </div>
     </div>
 
-    <!-- Dashboard Charts -->
     <div class="row mb-4">
         <div class="col-md-6">
             <div class="card">
@@ -257,7 +246,6 @@ $expenses = $stmt->fetchAll();
         </div>
     </div>
 
-    <!-- Expense Form -->
     <div class="card mb-4">
         <div class="card-header">
             <h5><?= $editing ? 'Edit Expense' : 'Add New Expense' ?></h5>
@@ -317,7 +305,6 @@ $expenses = $stmt->fetchAll();
         </div>
     </div>
 
-    <!-- Expenses List -->
     <div class="card">
         <div class="card-header">
             <h5>Your Expenses</h5>
@@ -358,7 +345,6 @@ $expenses = $stmt->fetchAll();
                     </table>
                 </div>
                 
-                <!-- Total Expenses -->
                 <div class="mt-3 p-3 bg-light rounded">
                     <h5>Total Expenses: $<?= number_format(array_sum(array_column($expenses, 'amount')), 2) ?></h5>
                 </div>
@@ -370,7 +356,6 @@ $expenses = $stmt->fetchAll();
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Category Chart
         const categoryCtx = document.getElementById('categoryChart').getContext('2d');
         const categoryChart = new Chart(categoryCtx, {
             type: 'doughnut',
@@ -404,7 +389,6 @@ $expenses = $stmt->fetchAll();
             }
         });
 
-        // Monthly Chart
         const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
         const monthlyChart = new Chart(monthlyCtx, {
             type: 'line',
